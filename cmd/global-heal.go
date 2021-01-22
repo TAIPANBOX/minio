@@ -165,10 +165,14 @@ func healErasureSet(ctx context.Context, setIndex int, buckets []BucketInfo, dis
 			}
 
 			for _, version := range entry.Versions {
-				bgSeq.sourceCh <- healSource{
+				if err := bgSeq.queueHealTask(healSource{
 					bucket:    bucket.Name,
 					object:    version.Name,
 					versionID: version.VersionID,
+				}, madmin.HealItemObject); err != nil {
+					if !isErrObjectNotFound(err) && !isErrVersionNotFound(err) {
+						logger.LogIf(ctx, err)
+					}
 				}
 			}
 		}

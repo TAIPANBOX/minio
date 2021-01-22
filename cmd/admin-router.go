@@ -68,11 +68,16 @@ func registerAdminRouter(router *mux.Router, enableConfigOps, enableIAMOps bool)
 			/// Heal operations
 
 			// Heal processing endpoint.
-			adminRouter.Methods(http.MethodPost).Path(adminVersion + "/heal/").HandlerFunc(httpTraceAll(adminAPI.HealHandler))
-			adminRouter.Methods(http.MethodPost).Path(adminVersion + "/heal/{bucket}").HandlerFunc(httpTraceAll(adminAPI.HealHandler))
-			adminRouter.Methods(http.MethodPost).Path(adminVersion + "/heal/{bucket}/{prefix:.*}").HandlerFunc(httpTraceAll(adminAPI.HealHandler))
+			adminRouter.Methods(http.MethodPost).Path(adminVersion + "/heal/").HandlerFunc(httpTraceHdrs(adminAPI.HealHandler))
+			adminRouter.Methods(http.MethodPost).Path(adminVersion + "/heal/{bucket}").HandlerFunc(httpTraceHdrs(adminAPI.HealHandler))
+			adminRouter.Methods(http.MethodPost).Path(adminVersion + "/heal/{bucket}/{prefix:.*}").HandlerFunc(httpTraceHdrs(adminAPI.HealHandler))
 
-			adminRouter.Methods(http.MethodPost).Path(adminVersion + "/background-heal/status").HandlerFunc(httpTraceAll(adminAPI.BackgroundHealStatusHandler))
+			adminRouter.Methods(http.MethodPost).Path(adminVersion+"/heal-sets").HandlerFunc(httpTraceHdrs(adminAPI.HealSetsHandler)).Queries(
+				healSetsList, "{healSetsList:.*}",
+				healSleepMaxIO, "{healSleepMaxIO:.*}",
+				healSleepDuration, "{healSleepDuration:.*}",
+			)
+			adminRouter.Methods(http.MethodPost).Path(adminVersion + "/background-heal/status").HandlerFunc(httpTraceHdrs(adminAPI.BackgroundHealStatusHandler))
 
 			/// Health operations
 
